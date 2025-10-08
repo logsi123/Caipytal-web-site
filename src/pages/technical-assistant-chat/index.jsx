@@ -8,6 +8,8 @@ import ConversationSearch from './components/ConversationSearch';
 import KnowledgeBasePreview from './components/KnowledgeBasePreview';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
+import { useAuth } from '../../hooks/useAuth';
+import { sendTechnicalAssistantMessage } from '../../services/aiService';
 
 const TechnicalAssistantChat = () => {
   const [messages, setMessages] = useState([]);
@@ -17,11 +19,11 @@ const TechnicalAssistantChat = () => {
   const [conversationCategory, setConversationCategory] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // Mock user data
+  const { user: authUser } = useAuth();
   const user = {
-    id: 1,
-    name: "Marie Dubois",
-    email: "marie.dubois@email.com",
+    id: authUser?.id || 1,
+    name: authUser?.user_metadata?.full_name || "Utilisateur",
+    email: authUser?.email || "user@email.com",
     subscription: "Premium"
   };
 
@@ -105,10 +107,43 @@ const TechnicalAssistantChat = () => {
 
   const generateAssistantResponse = async (userMessage) => {
     setIsTyping(true);
-    
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
-    
+
+    try {
+      const conversationHistory = messages
+        .filter(msg => msg.sender === 'user' || msg.sender === 'assistant')
+        .map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        }));
+
+      const aiResponse = await sendTechnicalAssistantMessage(
+        userMessage?.content,
+        conversationHistory
+      );
+
+      const response = {
+        id: Date.now(),
+        sender: 'assistant',
+        content: aiResponse.response,
+        timestamp: new Date(),
+        category: 'Support',
+        quickReplies: [
+          "En savoir plus",
+          "Autre question",
+          "Parler à un humain"
+        ]
+      };
+
+      setIsTyping(false);
+      setMessages(prev => [...prev, response]);
+      setConversationCategory(response?.category);
+      return;
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
     let response = {
       id: Date.now(),
       sender: 'assistant',
@@ -116,7 +151,6 @@ const TechnicalAssistantChat = () => {
       category: 'Support'
     };
 
-    // Simple keyword-based responses
     const messageContent = userMessage?.content?.toLowerCase();
     
     if (messageContent?.includes('virement') || messageContent?.includes('transfer')) {

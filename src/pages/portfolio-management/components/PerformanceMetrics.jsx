@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from '../../../components/AppIcon';
+import Icon from 'components/AppIcon';
 
 const PerformanceMetrics = ({ metrics }) => {
   const MetricCard = ({ title, value, subtitle, icon, trend, isPercentage = false }) => {

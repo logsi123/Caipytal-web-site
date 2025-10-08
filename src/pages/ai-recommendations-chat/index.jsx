@@ -4,17 +4,20 @@ import ChatHeader from './components/ChatHeader';
 import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import WelcomeMessage from './components/WelcomeMessage';
+import { useAuth } from '../../hooks/useAuth';
+import { getAIRecommendations } from '../../services/aiService';
 
 const AIRecommendationsChat = () => {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [subscriptionPlan, setSubscriptionPlan] = useState('BASIC');
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const { user, loading } = useAuth();
 
-  // Mock user data
   const mockUser = {
-    name: "Marie Dubois",
-    email: "marie.dubois@email.com"
+    name: user?.user_metadata?.full_name || "Utilisateur",
+    email: user?.email || "user@email.com"
   };
 
   // Mock AI responses with recommendations
@@ -130,7 +133,6 @@ const AIRecommendationsChat = () => {
   };
 
   const handleSendMessage = async (messageText) => {
-    // Add user message
     const userMessage = {
       id: Date.now(),
       sender: 'user',
@@ -142,20 +144,47 @@ const AIRecommendationsChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Simulate AI processing time
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(messageText);
+    try {
+      const response = await getAIRecommendations(subscriptionPlan, {
+        riskTolerance: 'MEDIUM',
+        investmentGoals: messageText,
+        currentBalance: 10000
+      });
+
       const aiMessage = {
         id: Date.now() + 1,
         sender: 'ai',
-        content: aiResponse.content,
-        recommendations: aiResponse.recommendations,
+        content: 'Voici mes recommandations personnalisées basées sur votre profil :',
+        recommendations: response.recommendations.map((rec, idx) => ({
+          symbol: rec.category || 'N/A',
+          companyName: rec.title,
+          exchange: 'Market',
+          action: 'Recommandation',
+          currentPrice: 0,
+          targetPrice: 0,
+          potentialReturn: parseFloat(rec.expectedReturn) || 0,
+          riskLevel: rec.riskLevel === 'HIGH' ? 'Élevé' : rec.riskLevel === 'MEDIUM' ? 'Modéré' : 'Faible',
+          confidenceLevel: 4,
+          reasoning: rec.reasoning || rec.description,
+          metrics: {}
+        })),
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error getting recommendations:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        sender: 'ai',
+        content: 'Désolé, je rencontre des difficultés pour générer des recommandations. Veuillez réessayer.',
+        recommendations: [],
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500 + Math.random() * 1000);
+    }
   };
 
   const handleClearChat = () => {

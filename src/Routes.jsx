@@ -9,6 +9,8 @@ import LandingPage from './pages/landing-page';
 import PortfolioManagement from './pages/portfolio-management';
 import DashboardHome from './pages/dashboard-home';
 import AIRecommendationsChat from './pages/ai-recommendations-chat';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 const Routes = () => {
   return (
@@ -18,6 +20,9 @@ const Routes = () => {
       <RouterRoutes>
         {/* Define your route here */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/dashboard" element={<DashboardHome />} />
         <Route path="/wire-transfer-modal" element={<WireTransferModal />} />
         <Route path="/technical-assistant-chat" element={<TechnicalAssistantChat />} />
         <Route path="/landing-page" element={<LandingPage />} />

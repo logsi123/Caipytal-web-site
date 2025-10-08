@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
+import Icon from 'components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const AIRecommendations = ({ recommendations, onApplyRecommendation, onDismissRecommendation }) => {

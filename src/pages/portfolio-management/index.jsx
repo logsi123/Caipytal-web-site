@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Icon from '../../../components/AppIcon';
+import Icon from 'components/AppIcon';
 
 const Footer = () => {
   const currentYear = new Date()?.getFullYear();

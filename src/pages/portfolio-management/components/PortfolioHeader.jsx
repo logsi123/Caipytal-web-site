@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from '../../../components/AppIcon';
+import Icon from 'components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const PortfolioHeader = ({ totalValue, dailyChange, dailyChangePercent, isPositive, onExport, onRefresh }) => {
